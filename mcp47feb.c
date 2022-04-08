@@ -48,8 +48,8 @@
 static uint8_t readBuffer[5];
 
 
-static void _ReadEpAddr(MCP47FEB_TypeDef *dac, uint8_t REG, unsigned char buffer[5]);
-static void _ReadAddr(MCP47FEB_TypeDef *dac, uint8_t REG, unsigned char buffer[5]);
+static void _ReadEpAddr(MCP47FEB_TypeDef *dac, uint8_t REG, uint8_t buffer[5]);
+static void _ReadAddr(MCP47FEB_TypeDef *dac, uint8_t REG, uint8_t buffer[5]);
 static void _FastWrite(MCP47FEB_TypeDef *dac, uint8_t REG, uint16_t DATA);
 static void _WriteAddr(MCP47FEB_TypeDef *dac, uint8_t REG, uint8_t data);
 
@@ -82,13 +82,13 @@ HAL_StatusTypeDef MCP47FEB_IsReady(MCP47FEB_TypeDef *dac) {
  * @param REG 
  * @param buffer 
  */
-static void _ReadEpAddr(MCP47FEB_TypeDef *dac, uint8_t REG, unsigned char buffer[5]) {
+static void _ReadEpAddr(MCP47FEB_TypeDef *dac, uint8_t REG, uint8_t buffer[5]) {
 	uint8_t readReg = 0x80 | (READ | (REG << 3));
 	HAL_I2C_Master_Transmit(dac->hi2c, dac->devAddr<<1, &readReg, 1, MCP47FEB_I2C_DELAY);
 	HAL_I2C_Master_Receive(dac->hi2c, dac->devAddr<<1, buffer, 2, MCP47FEB_I2C_DELAY);
 }
 
-static void _ReadAddr(MCP47FEB_TypeDef *dac, uint8_t REG, unsigned char buffer[5]) {
+static void _ReadAddr(MCP47FEB_TypeDef *dac, uint8_t REG, uint8_t buffer[5]) {
 	uint8_t readReg = READ | (REG << 3);
 	HAL_I2C_Master_Transmit(dac->hi2c, dac->devAddr<<1, &readReg, 1, MCP47FEB_I2C_DELAY);
 	HAL_I2C_Master_Receive(dac->hi2c, dac->devAddr<<1, buffer, 2, MCP47FEB_I2C_DELAY);
