@@ -120,7 +120,7 @@ static void _FastWrite(MCP47FEB_TypeDef *dac, uint8_t REG, uint16_t DATA) {
 
 static void _WriteAddr(MCP47FEB_TypeDef *dac, uint8_t REG, uint8_t data) {
 	uint8_t payload[3];
-	payload[0] = REG | WRITE;
+	payload[0] = (REG << 3) | WRITE;
 	if (REG == GAIN_REG) {
 		payload[2] = 0;
 		payload[1] = data;
@@ -150,8 +150,17 @@ void MCP47FEB_LockSALCK(MCP47FEB_TypeDef *dac, uint8_t addr) {
 	_WriteAddr(&BIAS_DAC, (SALCK | UNLOCK_SALCK), 0);
 	//SET HVC PIN LOW
 }
-
-uint8_t MCP47FEB_GetPowerDown(MCP47FEB_TypeDef *dac, int channel) {
+/**
+ * @brief 			Get the Power-Down control bits for a channel
+ * 					0x00 = Normal Operation
+ * 					0x01 = 1kOhm resistor to ground
+ * 					0x10 = 100kOhm resistor to ground
+ * 					0x11 = Open Circuit
+ * @param dac		DAC Struct 
+ * @param channel 	Channel to read
+ * @return uint8_t 	Control Bits. 
+ */
+uint8_t MCP47FEB_GetPowerDown(MCP47FEB_TypeDef *dac, uint8_t channel) {
 	_ReadAddr(dac, PD_REG, readBuffer);
 	uint8_t _powerDown[2];
 	_powerDown[0] = (readBuffer[1] & 0x03); 		// 0B00000011
@@ -159,12 +168,22 @@ uint8_t MCP47FEB_GetPowerDown(MCP47FEB_TypeDef *dac, int channel) {
 	return (channel == 0) ? _powerDown[0] : _powerDown[1];
 }
 
-void MCP47FEB_SetPowerDown(MCP47FEB_TypeDef *dac, int val0, int val1) {
+/**
+ * @brief 		Set the Power-Down control bits
+ * 					0x00 = Normal Operation
+ * 					0x01 = 1kOhm resistor to ground
+ * 					0x10 = 100kOhm resistor to ground
+ * 					0x11 = Open Circuit
+ * @param dac 	DAC Struct
+ * @param val0 	Channel 0 Bits
+ * @param val1 	Channel 1 Bits
+ */
+void MCP47FEB_SetPowerDown(MCP47FEB_TypeDef *dac, uint8_t val0, uint8_t val1) {
 	_WriteAddr(dac, PD_REG, (val0 | val1<<2));
 }
 
 
-uint8_t MCP47FEB_GetPowerDownEp(MCP47FEB_TypeDef *dac, int channel) {
+uint8_t MCP47FEB_GetPowerDownEp(MCP47FEB_TypeDef *dac, uint8_t channel) {
 	_ReadEpAddr(dac, PD_REG, readBuffer);
 	uint8_t _powerDownEp[2];
 	_powerDownEp[0] = (readBuffer[1] & 0x03); 			// 0B00000011);
@@ -172,8 +191,14 @@ uint8_t MCP47FEB_GetPowerDownEp(MCP47FEB_TypeDef *dac, int channel) {
 	return (channel == 0) ? _powerDownEp[0] : _powerDownEp[1];
 }
 
-
-uint8_t MCP47FEB_GetGain(MCP47FEB_TypeDef *dac, int channel) {
+/**
+ * @brief 			Get the Gain Control bit for a given channel
+ * 
+ * @param dac 		DAC Struct
+ * @param channel 	Channel
+ * @return uint8_t 	Gain Bits set. 1 = 2x Gain, 0 = 1x Gain
+ */
+uint8_t MCP47FEB_GetGain(MCP47FEB_TypeDef *dac, uint8_t channel) {
 	uint8_t buff[5] = {0};
 	_ReadAddr(dac, GAIN_REG, buff);
 	uint8_t _gain[2];
@@ -182,12 +207,18 @@ uint8_t MCP47FEB_GetGain(MCP47FEB_TypeDef *dac, int channel) {
 	return (channel == 0) ? _gain[0] : _gain[1];
 }
 
-
-void MCP47FEB_SetGain(MCP47FEB_TypeDef *dac, int val0, int val1) {
+/**
+ * @brief 		Sets the Gain Control bits (Datasheet p.39)
+ *	 			
+ * @param dac 	DAC Struct
+ * @param val0	DAC0 Gain control. 1 = 2x Gain, 0 = 1x Gain
+ * @param val1 	DAC1 Gain contron. 1 = 2x Gain, 0 = 1x Gain
+ */
+void MCP47FEB_SetGain(MCP47FEB_TypeDef *dac, uint8_t val0, uint8_t val1) {
 	_WriteAddr(dac, GAIN_REG, (val0 | (val1<<1)));
 }
 
-uint8_t MCP47FEB_GetGainEp(MCP47FEB_TypeDef *dac, int channel) {
+uint8_t MCP47FEB_GetGainEp(MCP47FEB_TypeDef *dac, uint8_t channel) {
 	_ReadEpAddr(dac, GAIN_REG, readBuffer);
 	uint8_t _gainEp[2];
 	_gainEp[0] = (readBuffer[0] & 0x01);		//0B00000001);
@@ -195,7 +226,18 @@ uint8_t MCP47FEB_GetGainEp(MCP47FEB_TypeDef *dac, int channel) {
 	return (channel == 0) ? _gainEp[0] : _gainEp[1];
 }
 
-uint8_t MCP47FEB_GetVref(MCP47FEB_TypeDef *dac, uint8_t channel) {//uint8_t channel) {
+/**
+ * @brief 			Get the Voltage Reference Control Register for a channel
+ * 					(Datasheet register 4-2)
+ * 					0b11 = Vref buffer enabled
+ * 					0b10 = Vref buffer disabled
+ * 					0b01 = Vref buffer enabled. Voltage driven when powered down
+ * 					0b00 = Vref buffer disabled. Lowest current
+ * @param dac 		DAC Struct
+ * @param channel 	Channel to read
+ * @return uint8_t 	Voltage Reference
+ */
+uint8_t MCP47FEB_GetVref(MCP47FEB_TypeDef *dac, uint8_t channel) {
 	_ReadAddr(dac,VREF_REG, readBuffer);
 	uint8_t _intVref[2];
 	_intVref[0] = (readBuffer[1] & 0x03); 		//0b00000011);
@@ -203,10 +245,29 @@ uint8_t MCP47FEB_GetVref(MCP47FEB_TypeDef *dac, uint8_t channel) {//uint8_t chan
 	return (channel == 0) ? _intVref[0] : _intVref[1];
 }
 
+/**
+ * @brief 		Set the Voltage Reference Control Register for each channel
+ * 					(Datasheet register 4-2)
+ * 					0b11 = Vref buffer enabled
+ * 					0b10 = Vref buffer disabled
+ * 					0b01 = Vref buffer enabled. Voltage driven when powered down
+ * 					0b00 = Vref buffer disabled. Lowest current
+ * 
+ * @param dac 	DAC Struct
+ * @param val0 	Channel0 value to write
+ * @param val1 	Channel1 value to write
+ */
 void MCP47FEB_SetVref(MCP47FEB_TypeDef *dac, uint8_t val0, uint8_t val1) {
 	_WriteAddr(dac, VREF_REG, (val0 | (val1<<2)));
 }
 
+/**
+ * @brief 			Get the Voltage Reference stored in the EEPROM
+ * 
+ * @param dac 		DAC Struct
+ * @param channel 	Channel to read
+ * @return uint8_t 	Vref control bits.
+ */
 uint8_t MCP47FEB_GetVrefEp(MCP47FEB_TypeDef *dac, uint8_t channel) {//uint8_t channel) {
 	_ReadEpAddr(dac, VREF_REG, readBuffer);
 	uint8_t _intVrefEp[2];
@@ -215,11 +276,25 @@ uint8_t MCP47FEB_GetVrefEp(MCP47FEB_TypeDef *dac, uint8_t channel) {//uint8_t ch
 	return (channel == 0) ? _intVrefEp[0] : _intVrefEp[1];
 }
 
+/**
+ * @brief 			Gets the DAC value set to a channel (0-4096)
+ * 
+ * @param dac 		DAC Struct
+ * @param channel 	Channel to read
+ * @return uint16_t Channel's value (0-4096)
+ */
 uint16_t MCP47FEB_GetValue(MCP47FEB_TypeDef *dac, uint8_t channel) {
-	_ReadAddr(dac, (channel << 3), readBuffer);
+	_ReadAddr(dac, channel, readBuffer);
 	return word((readBuffer[0] & 0x0F), readBuffer[1]);
 }
 
+/**
+ * @brief 			Write value to the DAC Channels (0-4096)
+ * 
+ * @param dac 		DAC Struct
+ * @param val0 		Channel0 Value to write 
+ * @param val1 		Channel1 Value to write
+ */
 void MCP47FEB_AnalogWrite(MCP47FEB_TypeDef *dac, uint16_t val0, uint16_t val1) {
 	val0 &= 0xFFF;
 	val1 &= 0xFFF; //Prevent going over 4095
@@ -227,6 +302,11 @@ void MCP47FEB_AnalogWrite(MCP47FEB_TypeDef *dac, uint16_t val0, uint16_t val1) {
 	_FastWrite(dac, DAC1_REG, val1);
 }
 
+/**
+ * @brief 		Write the current values of the DAC to it's EEPROM
+ * 
+ * @param dac 	DAC Struct
+ */
 void MCP47FEB_EEPROMWrite(MCP47FEB_TypeDef *dac) {
 	_FastWrite(dac, DAC0_EP_REG, MCP47FEB_GetValue(dac, 0));
 	_FastWrite(dac, DAC1_EP_REG, MCP47FEB_GetValue(dac, 1));
