@@ -46,20 +46,6 @@
 
 
 static uint8_t readBuffer[5];
-//static unsigned char 	readBuffer[5];
-//static unsigned char _buffer[5];
-//static uint8_t      _dev_address;
-//static uint8_t      _deviceID;
-////static uint8_t      _intVref[2];
-//static uint8_t      _gain[2];
-//static uint8_t      _powerDown[2];
-//static uint16_t     _values[2];
-//static uint16_t     _valuesEp[2];
-//static uint8_t      _intVrefEp[2];
-//static uint8_t      _gainEp[2];
-//static uint8_t      _powerDownEp[2];
-//static uint8_t      _wiperLock[2];
-//static uint16_t     _vdd;
 
 
 static void _ReadEpAddr(MCP47FEB_TypeDef *dac, uint8_t REG, unsigned char buffer[5]);
