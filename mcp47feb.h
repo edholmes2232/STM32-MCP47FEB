@@ -24,6 +24,7 @@ void 	            MCP47FEB_Init(MCP47FEB_TypeDef *dac, uint8_t devAddr, I2C_Hand
 HAL_StatusTypeDef   MCP47FEB_IsReady(MCP47FEB_TypeDef *dac);
 void  	            MCP47FEB_UnlockSALCK(MCP47FEB_TypeDef *dac);
 void  	            MCP47FEB_LockSALCK(MCP47FEB_TypeDef *dac, uint8_t addr);
+void 				MCP47FEB_ChangeAddr(MCP47FEB_TypeDef *dac, uint8_t addr);
 uint8_t             MCP47FEB_GetPowerDown(MCP47FEB_TypeDef *dac, uint8_t channel);
 void 	            MCP47FEB_SetPowerDown(MCP47FEB_TypeDef *dac, uint8_t val0, uint8_t val1);
 uint8_t             MCP47FEB_GetPowerDownEp(MCP47FEB_TypeDef *dac, uint8_t channel);

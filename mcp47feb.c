@@ -121,21 +121,36 @@ static void _WriteAddr(MCP47FEB_TypeDef *dac, uint8_t REG, uint8_t data) {
 
 void MCP47FEB_UnlockSALCK(MCP47FEB_TypeDef *dac) {
 	//SET HVC PIN LOW
-	_WriteAddr(dac, (SALCK | UNLOCK_SALCK), 0);
+
+	uint8_t payload[3];
+	payload[0] = (SALCK | UNLOCK_SALCK);
+	payload[1] = 0;
+	payload[2] = 0;
+	HAL_I2C_Master_Transmit(dac->hi2c, dac->devAddr<<1, (uint8_t*)&payload, 3, MCP47FEB_I2C_DELAY);
+
 	// SET HVC PIN LOW
 }
 
 void MCP47FEB_LockSALCK(MCP47FEB_TypeDef *dac, uint8_t addr) {
 	//SET HVC PIN HIGH
-	/* Create new struct with new addr */
-	MCP47FEB_TypeDef BIAS_DAC = {
-		addr,
-		dac->hi2c,
-	};
 
-	_WriteAddr(&BIAS_DAC, (SALCK | UNLOCK_SALCK), 0);
+	uint8_t payload[3];
+	payload[0] = (SALCK | LOCK_SALCK);
+	payload[1] = 0;
+	payload[2] = 0;
+	HAL_I2C_Master_Transmit(dac->hi2c, addr<<1, (uint8_t*)&payload, 3, MCP47FEB_I2C_DELAY);
 	//SET HVC PIN LOW
 }
+
+void MCP47FEB_ChangeAddr(MCP47FEB_TypeDef *dac, uint8_t addr) {
+	//_WriteAddr(dac, SALCK, addr);
+	uint8_t payload[3];
+	payload[0] = (SALCK);
+	payload[1] = 0;
+	payload[2] = addr;
+	HAL_I2C_Master_Transmit(dac->hi2c, dac->devAddr<<1, (uint8_t*)&payload, 3, MCP47FEB_I2C_DELAY);
+}
+
 /**
  * @brief 			Get the Power-Down control bits for a channel
  * 					0x00 = Normal Operation
